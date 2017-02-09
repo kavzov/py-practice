@@ -1,8 +1,9 @@
 """
 Console version of tick-tack toe.
-It written not for descovering new trend of artificial intelligence development.
-It has intelligence mismatches, and there are many ways to improve it.
-But the game written just for Python practice.
+It is possible to set any dimension of a board (default 3x3) by changing value of 'dim' at Board class init block
+The game written not for descovering new trend of artificial intelligence development.
+It has quite enough intelligence mismatches, and there are many ways to improve it.
+The game was written just for Python practice.
 """
 import random, time
 
