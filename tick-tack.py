@@ -1,6 +1,6 @@
 """
 Console version of tick-tack toe.
-It is possible to set any dimension of a board (default 3x3) by changing value of 'dim' at Board class init block
+It is possible to set any dimension of a board (default 3x3) by changing value of 'dim' at Board class initialization block.
 The game was written not for discover new trends at artificial intelligence development.
 It has simple intelligence and quite enough of mismatches.
 There are many ways to improve it, but the game was written just for Python practice.
@@ -14,10 +14,6 @@ class Player:
         self.moves = []
         self.sign = ""
         self.win_combs = []
-
-
-    def make_move(self, game, board):
-        pass
 
 
     def set_win_combs(self, game, move):
@@ -101,7 +97,7 @@ class Machine(Player):
     """ Machine """
     def make_move(self, game, board):
         """ Make move of machine player.
-            Use simple intelligence
+            It implements simple intelligence.
         """
         print("{} making a move...".format(self.name))
         time.sleep(random.random())                           # imitation of machine thinking
