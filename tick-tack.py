@@ -107,30 +107,28 @@ class Machine(Player):
         time.sleep(random.random())                           # imitation of machine thinking
         pos = None
         if not self.moves:                                    # if it is first
-            if board.center and board._center_is_free(game):  # if it is center and it's free
+            if board.center and board.center_is_free(game):   # if it is center and it's free
                 if self.probab(75):                           # in 75% cases
                     pos = board.center                        # select center
                     board.center = None
                 else:                                         # in 25% cases
-                    pos = board._get_free_angle(game)         # select one of angles
+                    pos = board.get_free_angle(game)          # select one of angles
             else:                                             # if no center (busy or dim - even)
-                pos = board._get_free_angle(game)             # select one of angles
+                pos = board.get_free_angle(game)              # select one of angles
         else:                                                 # if it is second/further move
-            # prevent opponent win
-            opponent = game.opp_player(self)
-            opp_pre_win = opponent.pre_win(board.dim-1)
-            if opp_pre_win:
-                pos = list(set(opp_pre_win['comb']) - set(opp_pre_win['moves']))[0]
-            # go for win
+            pre_win_sit = self.pre_win(board.dim-1)
+            if pre_win_sit:                                   # if one move to win, do this move
+                pos = list(set(pre_win_sit['comb']) - set(pre_win_sit['moves']))[0]
             else:
-                pre_win_sit = self.pre_win(board.dim-1)
-                if pre_win_sit:                               # if one move to win, do this move
-                    pos = list(set(pre_win_sit['comb']) - set(pre_win_sit['moves']))[0]
+                # prevent opponent win
+                opponent = game.opp_player(self)
+                opp_pre_win = opponent.pre_win(board.dim-1)
+                if opp_pre_win:
+                    pos = list(set(opp_pre_win['comb']) - set(opp_pre_win['moves']))[0]
+                # go for win
                 else:
-                    # select random win comb
-                    rand_win_comb = self.get_win_comb()
-                    # select move from the comb
-                    pos = self.get_move_from_win_comb(rand_win_comb)
+                    rand_win_comb = self.get_win_comb()                # select random win comb
+                    pos = self.get_move_from_win_comb(rand_win_comb)   # select move from the comb
         return pos
 
 
@@ -161,7 +159,7 @@ class Machine(Player):
 
 
 class Board:
-
+    """ Board """
     dim = 3                    # board dimension (3x3, 4x4,..., nxn, n >= 3)
     n_cells = dim ** 2         # total number of cells in board
 
@@ -174,8 +172,8 @@ class Board:
         self.cell_size = 3              # size of single cell (3x3, 5x5,...,nxn, n >= 3, n - odd)
         self.blank_sym = " "
 
-        self.center = self._set_center()
-        self.angles = self._set_angles()
+        self.center = self.set_center()
+        self.angles = self.set_angles()
 
         self.values = [self.blank_sym for i in range(self.n_cells)]
         # values = [blank_sym for i in range(n_cells)], in case when 'blank_sym' like static const (not in __init__)
@@ -186,19 +184,19 @@ class Board:
         # self.values = (lambda sym=self.blank_sym, num=self.n_cells: [sym for i in range(num)])()    # initital (blank) values of board cells
 
 
-    def _set_center(self):
+    def set_center(self):
         """ Return center of board if it is poosible (odd board dimension) """
         if self.dim % 2 != 0:
             return self.n_cells // 2
 
 
-    def _center_is_free(self, game):
+    def center_is_free(self, game):
         """ Check either the center of board is free or no"""
         if self.center in game.moves:
             return True
 
 
-    def _set_angles(self):
+    def set_angles(self):
         """ Return all angles indexes of the board """
         angles = [0]                              # left top
         angles += [self.dim - 1]                  # right top
@@ -207,7 +205,7 @@ class Board:
         return angles
 
 
-    def _get_free_angle(self, game):
+    def get_free_angle(self, game):
         """ Return random free angle """
         free_angles = []
 
@@ -221,7 +219,7 @@ class Board:
 
     def draw(self):
         """ Draw full board with values """
-        self._draw_horiz_line()
+        self.draw_horiz_line()
         # draw dim rows
         for row_num in range(self.dim):
             row_start_index = row_num * self.dim
@@ -230,7 +228,7 @@ class Board:
             self._draw_board_row(row_values)
 
 
-    def _draw_horiz_line(self):
+    def draw_horiz_line(self):
         """ Draw horizontal line of 'hLine_sym' and 'cross_sym' nodes """
         line = self.cross_sym
         for i in range(self.dim):
@@ -239,7 +237,7 @@ class Board:
         print(line)
 
 
-    def _is_middle(self, num, cell_size):
+    def is_middle(self, num, cell_size):
         """ Check index 'num' for middle positon of cell_size """
         if num == cell_size // 2:
             return True
@@ -251,19 +249,19 @@ class Board:
             Line with 'raw_values' is in the vertical middle of row
         """
         for line in range(self.cell_size):
-            if self._is_middle(line, self.cell_size):
-                self._draw_line(raw_values)
+            if self.is_middle(line, self.cell_size):
+                self.draw_line(raw_values)
             else:
-                self._draw_blank_line()
-        self._draw_horiz_line()
+                self.draw_blank_line()
+        self.draw_horiz_line()
 
 
-    def _draw_line(self, line_values):
+    def draw_line(self, line_values):
         """ Draw a line inside of row with values 'line_values' """
         line = self.vLine_sym
         for cell in range(self.dim):
             for point in range(self.cell_size):
-                if self._is_middle(point, self.cell_size):    # if point in horizontal middle of cell
+                if self.is_middle(point, self.cell_size):    # if point in horizontal middle of cell
                     line += line_values[cell]                 # put value
                 else:
                     line += self.blank_sym                    # put blank symbol
@@ -271,29 +269,28 @@ class Board:
         print(line)
 
 
-    def _draw_blank_line(self):
+    def draw_blank_line(self):
         """ Draw blank line in row
-            It is line (_draw_line()) with 'blank_sym' values
+            It is line (draw_line()) with 'blank_sym' values
         """
         blank_line_values = [self.blank_sym for i in range(self.dim)]
-        self._draw_line(blank_line_values)
+        self.draw_line(blank_line_values)
 
 # --------- class Board --------- #
 # --------------------------------#
 
 
 class Game:
-
+    """ Game """
     def __init__(self):
         self.signs = ('x', 'o')
         self.moves = [i for i in range(Board.n_cells)]    # available players moves. It will be popped once per move.
         self.players = []
         self.win_combs = []
-        self._get_win_combs(Board.dim, Board.n_cells)
+        self.get_win_combs(Board.dim, Board.n_cells)
 
-    def _get_win_combs(self, dim, n_cells):
+    def get_win_combs(self, dim, n_cells):
         """ Calculates winning combinations """
-
         # horizontal combs
         for i in range(0, n_cells, dim):
             comb = []
@@ -379,11 +376,9 @@ class Game:
                 return person
         
 
-
     def make_move(self, board, player):
         """ Call make_move of current player and handle the move """
         move = player.make_move(self, board)
-        # print(players[0].sign, "-", players[0].moves, "\ngame moves -", self.moves, "\nboard values -", board.values)
         self.move_handle(move, board, player)
 
 
@@ -419,6 +414,7 @@ class Game:
 
 
     def finish(self, board, msg):
+        """ Last step of the game -- draw final view of the board and print message """
         board.draw()
         print(msg)
 
@@ -446,13 +442,9 @@ def main():
         game.make_move(board, cur_player)
         if game.has_winner(cur_player.moves):
             fin_msg = "{} is Winner!!!".format(cur_player.name)
-            # board.draw()
-            # print("{} is Winner!!!".format(cur_player.name))
             break
         elif game.draw():
             fin_msg = "Draw!"
-            # board.draw()
-            # print("Draw!")
             break
         else:
             game.swap_que(game.players)
