@@ -4,6 +4,23 @@ It is possible to set any dimension of a board (default 3x3) by changing value o
 The game was written not for discover new trends at artificial intelligence development.
 It has simple intelligence and quite enough of mismatches, but it works in most real cases.
 There are many ways to improve it, but the game was written just for Python (3.5) practice.
+
+Numbers of possible moves (3x3 variant):
++---+---+---+
+|   |   |   |
+| 1 | 2 | 3 |
+|   |   |   |
++---+---+---+
+|   |   |   |
+| 4 | 5 | 6 |
+|   |   |   |
++---+---+---+
+|   |   |   |
+| 7 | 8 | 9 |
+|   |   |   |
++---+---+---+
+Similar for other board dimensions.
+0 - quit game
 """
 import random, time
 
@@ -123,8 +140,11 @@ class Machine(Player):
                     pos = list(set(opp_pre_win['comb']) - set(opp_pre_win['moves']))[0]
                 # go for win
                 else:
-                    rand_win_comb = self.get_win_comb()                # select random win comb
-                    pos = self.get_move_from_win_comb(rand_win_comb)   # select move from the comb
+                    rand_win_comb = self.get_win_comb()                    # select random win comb
+                    if rand_win_comb:
+                        pos = self.get_move_from_win_comb(rand_win_comb)   # select move from the comb
+                    else:
+                        pos = random.choice(game.moves)
         return pos
 
 
@@ -137,7 +157,8 @@ class Machine(Player):
 
     def get_win_comb(self):
         """ Random select a win comb """
-        return random.choice(self.win_combs)
+        if self.win_combs:
+            return random.choice(self.win_combs)
 
 
     def get_move_from_win_comb(self, win_comb):
@@ -221,7 +242,7 @@ class Board:
             row_start_index = row_num * self.dim
             cell_range = range(row_start_index, row_start_index + self.dim)
             row_values = [self.values[i] for i in cell_range]
-            self._draw_board_row(row_values)
+            self.draw_board_row(row_values)
 
 
     def draw_horiz_line(self):
@@ -239,7 +260,7 @@ class Board:
             return True
 
 
-    def _draw_board_row(self, raw_values):
+    def draw_board_row(self, raw_values):
         """ Draw single row of Board.
             It consists of cell_size lines.
             Line with 'raw_values' is in the vertical middle of row
@@ -326,6 +347,7 @@ class Game:
         while first_player not in (1, 2):
             try:
                 first_player = int(input("Input 1 or 2: "))
+                if first_player == 0: quit()
             except ValueError:
                 continue
         if first_player == 2:
@@ -350,6 +372,7 @@ class Game:
         while human_choice not in (0, 1):
             try:
                 human_choice = int(input("Input 1 or 2: "))
+                if human_choice == 0: quit()
                 human_choice -= 1
             except ValueError:
                 continue
