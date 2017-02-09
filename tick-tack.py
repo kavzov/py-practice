@@ -22,6 +22,7 @@ Numbers of possible moves (3x3 variant):
 Similar for other board dimensions.
 0 - quit game
 """
+
 import random, time
 
 class Player:
