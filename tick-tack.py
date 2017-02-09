@@ -82,7 +82,7 @@ class Player:
 class Human(Player):
     """ Human """
     def make_move(self, game, board):
-        """  """
+        """ Get the move of human player """
         pos = None
         while pos not in game.moves:
             try:
